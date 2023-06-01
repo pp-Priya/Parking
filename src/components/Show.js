@@ -13,7 +13,7 @@ class Show extends Component {
   }
 
   componentDidMount() {
-    const ref = firebase.firestore().collection('boards').doc(this.props.match.params.id);
+    const ref = firebase.firestore().collection('parking').doc(this.props.match.params.id);
     ref.get().then((doc) => {
       if (doc.exists) {
         this.setState({
@@ -27,26 +27,35 @@ class Show extends Component {
     });
   }  
 
+  handleCall = (phoneNumber) => {
+    const telUrl = `tel:${phoneNumber}`;
+    window.open(telUrl);
+  };
+
   render() {
     return (
       <div class="container">
         <div class="panel panel-default">
-          <div class="panel-heading">         
-            <h3 class="panel-title">
-              {this.state.board.name}
+          <div class="panel-heading"> 
+          <br/>        
+            <h3 class="panel-title doublecol">
+              {this.state.board.name} <h4><Link to="/">Go to Home</Link></h4>
             </h3>
+            <br/>
           </div>
           <div class="panel-body">
             <dl>
-              <dt>Flat:</dt>
-              <dd>{this.state.board.flat}</dd>
-              <dt>vehicle:</dt>
+              <dt>Flat number:</dt>
+              <dd>{this.state.board.building} - {this.state.board.flat}</dd>
+              <dt>vehicle number:</dt>
               <dd>{this.state.board.vehicle}</dd>
-              <dt>Contact:</dt>
-              <dd>{this.state.board.contact}</dd>
+              <dt>Contact number:</dt>
+              <dd><a href={`tel:${this.state.board.contact}`} onClick={() => this.handleCall(this.state.board.contact)}>{this.state.board.contact}</a></dd>
+              <dt>Alternative Contact number:</dt>
+              <dd><a href={`tel:${this.state.board.altcontact}`} onClick={() => this.handleCall(this.state.board.altcontact)}>{this.state.board.altcontact}</a></dd>
             </dl>
             </div>
-            <h4><Link to="/">Go to Home</Link></h4>
+            
         </div>
       </div>
     );

@@ -30,3 +30,8 @@
     transform: rotate(360deg);
   }
 }
+
+.doublecol {
+  column-count: 2;
+  column-gap: 40px;
+}

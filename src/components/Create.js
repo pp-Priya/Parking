@@ -2,17 +2,21 @@ import React, { Component } from 'react';
 import firebase from '../firebase';
 import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import 'react-phone-number-input/style.css'
+import PhoneInput from 'react-phone-number-input'
 
 class Create extends Component {
 
   constructor() {
     super();
-    this.ref = firebase.firestore().collection('boards');
+    this.ref = firebase.firestore().collection('parking');
     this.state = {
       name: '',
+      building: '',
       flat: '',
-      vehicle: '',
+      vehicle: '',    
       contact: '',
+      altcontact: '',
     };
   }
   onChange = (e) => {
@@ -21,22 +25,44 @@ class Create extends Component {
     this.setState(state);
   }
 
+  handlePhoneNumberChange = (value) => {
+    if(value !== undefined){
+      this.setState({ contact: value });
+    }  
+    else{
+      this.setState({ contact: '' });
+    } 
+  };
+
+  handleAltPhoneNumberChange = (value) => {
+    if(value !== undefined){
+      this.setState({ altcontact: value });
+    }  
+    else{
+      this.setState({ altcontact: '' });
+    } 
+  };
+
   onSubmit = (e) => {
     e.preventDefault();
-    const { name, flat, vehicle, contact } = this.state;
+    const { name, flat, vehicle, contact, altcontact, building } = this.state;
 
-    if(name && vehicle){
+    if(name && vehicle && contact){
     this.ref.add({
       name,
+      building,
       flat,
       vehicle,
-      contact
+      contact,
+      altcontact
     }).then((docRef) => {
       this.setState({
         name: '',
+        building: '',
         flat: '',
         vehicle: '',
         contact: '',
+        altcontact: '',
       });
       this.props.history.push("/");
       Swal.fire({
@@ -52,13 +78,15 @@ class Create extends Component {
     Swal.fire({
       icon: 'warning',
       title: 'Add',
-      text: 'Name and vehicle number are required!!'
+      text: 'Please fill required fieds!!'
     })
   }
   }
 
+ 
+
   render() {
-    const { name, flat, vehicle, contact } = this.state;
+    const { name, building, flat, vehicle, contact,altcontact } = this.state;
     return (
       <div class="container">
         <div class="panel panel-default">
@@ -71,26 +99,52 @@ class Create extends Component {
             <form onSubmit={this.onSubmit}>
               <div class="form-group">
                 <label for="name">Name:</label>
-                <input type="text" class="form-control" name="name" value={name} onChange={this.onChange} placeholder="Name" />
+                <input type="text" class="form-control" name="name" value={name} onChange={this.onChange} placeholder="Name" required />
               </div>
-              <div class="form-group">
-                <label for="flat">Flat Number:</label>               
-                <input type="text" class="form-control" name="flat" value={flat} onChange={this.onChange} placeholder="Flat"/>
-              </div>              
               <div class="form-group">
                 <label for="vehicle">Vehicle Number:</label>
-                <input type="text" class="form-control" name="vehicle" value={vehicle} onChange={this.onChange} placeholder="vehicle" />
+                <input type="text" class="form-control" name="vehicle" value={vehicle} onChange={this.onChange} placeholder="Vehicle" required />
               </div>
+              <div class="form-group doublecol">
+               <label for="building">Select building</label>
+                <select class="form-control" name="building" id="building" value={building} onChange={this.onChange} required>
+                  <option value="">Select</option>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                  <option value="D">D</option>
+                  <option value="E">E</option>
+                  <option value="F">F</option>
+                  <option value="G">G</option>
+                  <option value="H">H</option>
+                </select>
+                <label for="flat">Flat Number:</label>               
+                <input type="number" class="form-control" name="flat" value={flat} onChange={this.onChange} placeholder="Flat" required />
+               </div>    
               <div class="form-group">
-                <label for="contact">Contact Number:</label>
-                <input type="number" class="form-control" name="contact" value={contact} onChange={this.onChange} placeholder="Contact" />
-              </div>
+                    <label for="contact">Contact Number:</label>
+                    <PhoneInput
+                    placeholder="Contact" className="form-control"
+                    defaultCountry="IN"
+                    length="10"
+                    value={contact}
+                    onChange={this.handlePhoneNumberChange} rules={{ required: true }} />          
+              </div>     
+              <div class="form-group">                    
+                    <label for="Altcontact">Alternative Contact Number:</label>
+                    <PhoneInput
+                    placeholder="Contact" className="form-control"
+                    defaultCountry="IN"
+                    length="10"
+                    value={altcontact}
+                    onChange={this.handleAltPhoneNumberChange}/>              
+              </div>              
               <div>
               <button type="submit" class="btn btn-success">Submit</button>&nbsp;
               <button type="button" class="btn btn-secondry"><Link to="/">Back</Link></button>
               </div>
             </form>
-          </div>
+          </div>             
         </div>
       </div>
     );
