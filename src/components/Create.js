@@ -17,12 +17,21 @@ class Create extends Component {
       vehicle: '',    
       contact: '',
       altcontact: '',
+      isVehicleNoValid: false,
     };
   }
+
   onChange = (e) => {
     const state = this.state
-    state[e.target.name] = e.target.value;
+    state[e.target.name] = e.target.value;    
     this.setState(state);
+  }
+
+  handlevehicleChange = (event) => {
+    const vehicle = event.target.value;
+    const regex = /^[A-Z]{2}-[0-9]{2}-[A-Z]{1,2}-[0-9]{4}$/;
+    const isVehicleNoValid = regex.test(vehicle);
+    this.setState({ isVehicleNoValid, vehicle});
   }
 
   handlePhoneNumberChange = (value) => {
@@ -46,7 +55,6 @@ class Create extends Component {
   onSubmit = (e) => {
     e.preventDefault();
     const { name, flat, vehicle, contact, altcontact, building } = this.state;
-
     if(name && vehicle && contact){
     this.ref.add({
       name,
@@ -80,13 +88,10 @@ class Create extends Component {
       title: 'Add',
       text: 'Please fill required fieds!!'
     })
-  }
-  }
-
- 
+  }}  
 
   render() {
-    const { name, building, flat, vehicle, contact,altcontact } = this.state;
+    const { name, building, flat, vehicle, contact,altcontact, isVehicleNoValid} = this.state;
     return (
       <div class="container">
         <div class="panel panel-default">
@@ -103,7 +108,9 @@ class Create extends Component {
               </div>
               <div class="form-group">
                 <label for="vehicle">Vehicle Number:</label>
-                <input type="text" class="form-control" name="vehicle" value={vehicle} onChange={this.onChange} placeholder="Vehicle" required />
+                <input type="text" class="form-control" name="vehicle" value={vehicle}
+                pattern="^[A-Z]{2}-[0-9]{2}-[A-Z]{1,2}-[0-9]{4}$" onChange={this.handlevehicleChange} placeholder="Vehicle" required />
+                {isVehicleNoValid ? '' : <span class="custom-font-color">Please input a vehicle number in the format "GJ-05-HA-1977"</span>}
               </div>
               <div class="form-group doublecol">
                <label for="building">Select building</label>

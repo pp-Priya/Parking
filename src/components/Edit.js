@@ -17,11 +17,13 @@ class Edit extends Component {
       vehicle: '',    
       contact: '',
       altcontact: '',
+      isVehicleNoValid: false,
     };
   }
 
   componentDidMount() {
     const ref = firebase.firestore().collection('parking').doc(this.props.match.params.id);
+    const regex = /^[A-Z]{2}-[0-9]{2}-[A-Z]{1,2}-[0-9]{4}$/;
     ref.get().then((doc) => {
       if (doc.exists) {
         const board = doc.data();
@@ -33,6 +35,7 @@ class Edit extends Component {
           vehicle: board.vehicle,
           contact: board.contact,
           altcontact: board.altcontact,
+          isVehicleNoValid: regex.test(board.vehicle)
         });
       } else {
         console.log("No such document!");
@@ -64,11 +67,17 @@ class Edit extends Component {
     this.setState({board:state});
   }
 
+  handlevehicleChange = (event) => {
+    const vehicle = event.target.value;
+    const regex = /^[A-Z]{2}-[0-9]{2}-[A-Z]{1,2}-[0-9]{4}$/;
+    const isVehicleNoValid = regex.test(vehicle);
+    this.setState({ isVehicleNoValid, vehicle});
+  }
+
   onSubmit = (e) => {
     e.preventDefault();
-
     const { name, building, flat, vehicle, contact, altcontact} = this.state;
-
+    if(name && vehicle && contact){
     const updateRef = firebase.firestore().collection('parking').doc(this.state.key);
     updateRef.set({
       name,
@@ -97,9 +106,17 @@ class Edit extends Component {
     .catch((error) => {
       console.error("Error adding document: ", error);
     });
+  }else{
+    Swal.fire({
+      icon: 'warning',
+      title: 'Add',
+      text: 'Please fill required fieds!!'
+    })
+  }
   }
 
   render() {
+    const { isVehicleNoValid} = this.state;
     return (
       <div class="container">
         <div class="panel panel-default">
@@ -109,7 +126,6 @@ class Edit extends Component {
             </h3>
           </div>
           <div class="panel-body">
-            {/* <h4><Link to={`/show/${this.state.key}`} class="btn btn-primary">List</Link></h4> */}
             <form onSubmit={this.onSubmit}>
               <div class="form-group">
                 <label for="name">Name:</label>
@@ -117,8 +133,10 @@ class Edit extends Component {
               </div>
               <div class="form-group">
                 <label for="vehicle">Vehicle Number:</label>
-                <input type="text" class="form-control" name="vehicle" value={this.state.vehicle} onChange={this.onChange} placeholder="vehicle" required/>
-              </div>
+                <input type="text" class="form-control" name="vehicle" value={this.state.vehicle} 
+                pattern="^[A-Z]{2}-[0-9]{2}-[A-Z]{1,2}-[0-9]{4}$" onChange={this.handlevehicleChange} placeholder="Vehicle" required />
+               {isVehicleNoValid ? '' : <span class="custom-font-color">Please input a vehicle number in the format "GJ-05-HA-1977"</span>}
+               </div>              
               <div class="form-group doublecol">
               <label for="building">Select building</label>
                 <select class="form-control" name="building" id="building" value={this.state.building} onChange={this.onChange} required>
